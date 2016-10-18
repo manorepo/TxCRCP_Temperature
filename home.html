@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title of the document</title>
+    <style type="text/css">
+        #districts > path:hover {
+            fill-opacity: .7;
+        }
+
+        #districts > path {
+            stroke: white;
+            stroke-width: 2px;
+        }
+
+        svg {
+            font-family: "Helvetica Neue", Helvetica;
+        }
+
+        .d3-tip {
+            line-height: 1;
+            font-weight: bold;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 2px;
+        }
+
+            /* Creates a small triangle extender for the tooltip */
+            .d3-tip:after {
+                box-sizing: border-box;
+                display: inline;
+                font-size: 10px;
+                width: 100%;
+                line-height: 1;
+                color: rgba(0, 0, 0, 0.8);
+                content: "\25BC";
+                position: absolute;
+                text-align: center;
+            }
+
+            /* Style northward tooltips differently */
+            .d3-tip.n:after {
+                margin: -1px 0 0 0;
+                top: 100%;
+                left: 0;
+            }
+
+        .line {
+            fill: none;
+            stroke: #000;
+            stroke-width: 2px;
+        }
+
+        .brush .extent {
+            stroke: #fff;
+            fill-opacity: .125;
+            shape-rendering: crispEdges;
+        }
+
+        body {
+            font: 10px sans-serif;
+        }
+
+        .axis path,
+        .axis line,
+        .axis1 path,
+        .axis1 line {
+            fill: none;
+            stroke: #E6E7E8;
+            shape-rendering: crispEdges;
+        }
+
+        .x.axis path,
+        .x.axis1 path {
+            display: none;
+        }
+
+        .line {
+            fill: none;
+            stroke-width: 1.5px;
+        }
+
+        .legend-box {
+            cursor: pointer;
+            margin-bottom: 2px;
+        }
+
+        text {
+            font-size: 11px;
+        }
+
+        #mouse-tracker {
+            stroke: #E6E7E8;
+            stroke-width: 1px;
+        }
+
+        .hover-line {
+            stroke: #E6E7E8;
+            fill: none;
+            stroke-width: 1px;
+            left: 10px;
+            shape-rendering: crispEdges;
+            opacity: 1e-6;
+        }
+
+        .hover-text {
+            stroke: none;
+            font-size: 30px;
+            font-weight: bold;
+            fill: #000000;
+        }
+
+        .tooltip {
+            font-weight: normal;
+        }
+
+        .brush .extent {
+            stroke: #FFF;
+            shape-rendering: crispEdges;
+        }
+
+        .background {
+            fill: none;
+            pointer-events: all;
+        }
+
+        #districts {
+            fill: #aaa;
+        }
+
+            #districts .active {
+                fill: orange;
+            }
+
+        #state-borders {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 1.5px;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="row">
+        <!--Map Section-->
+        <div class="col-md-4 mapframe">
+        </div>
+        <!--TimeSeries Section-->
+        <div class="col-md-8 plotframe">
+        </div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="//d3js.org/d3.v4.min.js"></script>
+    <script src="js/d3-tooltip.js"></script>
+    <script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script type="text/javascript">//
+        var parse = d3.timeParse("%m %Y");
+        var districtsData = [];
+        var tempData = [];
+        d3.csv("TxDot_Temperatures.csv", function (data) {
+            data.forEach(function (d) {
+                //  console.log(d);
+                tempData.push({
+                    "dist_code": d.District,
+                    "dist_name": "test",
+                    "date": parse(d.Month + " " + "2016"),
+                    "avg_temp_max": +d["Average Maximum (F)"],
+                    "avg_temp_min": +d["Average Minimum (F)"],
+                    "avg_temp": +d["Average Temperature (F)"]
+
+                });
+            });
+            districtsData = d3.nest()
+         .key(function (d) {
+             return d.dist_code;
+         }).sortKeys(d3.ascending)
+         .entries(tempData);
+
+            console.log(districtsData);
+        });
+         //   console.log(districtsData);
+         
+
+        //Map SVG Logic
+        
+            var mapWidth = 560, mapHeight = 600, centered;
+
+            var projection = d3.geoMercator()
+                .center([-99.43, 31.47])
+                    .scale(2000)
+                    .translate([mapWidth / 2, mapHeight / 2]);
+
+            var mappath = d3.geoPath()
+                    .projection(projection);
+
+            var mapsvg = d3.select(".mapframe").append("svg")
+                    .attr("width", mapWidth)
+                    .attr("height", mapHeight);
+
+            /* Initialize tooltip */
+            var mapTip = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function (d) {
+                    //  console.log(d);
+                    return "<strong>" + d.properties.DIST_NM + "</strong>";
+                });
+            mapsvg.call(mapTip);
+            //mapsvg.append("rect")
+            //        .attr("class", "background")
+            //        .attr("Width", mapWidth)
+            //        .attr("Height", mapHeight)
+            //  .on("click", clicked);
+
+            var mapg = mapsvg.append("g");
+
+            d3.json("TxDOT_Districts.geojson", function (error, us) {
+
+                map_states = mapg.append("g")
+                        .attr("id", "districts")
+                        .selectAll("path")
+                        .data(us.features)
+                        .enter().append("path")
+                        .attr("d", mappath)
+                        .attr("title", function (d) {
+                            return d.properties.DIST_NM
+                        })
+                .on('mouseover', mapTip.show)
+                .on('mouseout', mapTip.hide);
+
+
+                mapg.append("path")
+                        .datum(topojson.mesh(us, us.features, function (a, b) { return a !== b; }))
+                        .attr("id", "state-borders")
+                        .attr("d", mappath);
+          
+            });
+        
+</script>
+</body>
+
+
+
+</html>
