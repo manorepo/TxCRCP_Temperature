@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+path { 
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<div id="chart">	</div>
+<select onchange=change(this.value)>
+	<option value="Minimum">Minimum</option>
+	<option value="Average" selected=true>Average</option>
+	<option value="Maximum">Maximum</option>  
+</select>
+<!-- load the d3.js library -->    
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+// Define the line
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.Month); })
+    //.y(function(d) { return y(d.Maximum); });
+    .y(function(d) { 
+		if(display_parameter=="Average"){
+			return y(d.Average	); 
+		}
+		else
+			return y(d.Maximum	); 
+	
+	});
+var display_parameter;
+var data1 = {};
+function change(s)
+{
+	display_parameter=""+s;
+
+	valueline = d3.svg.line()
+    .x(function(d) { return x(d.Month); })
+    //.y(function(d) { return y(d.Maximum); });
+    .y(function(d) { 
+		if(display_parameter=="Average"){
+			y.domain([30, 100]);
+			return y(d.Average); 
+		}
+		else if(display_parameter=="Minimum"){
+			y.domain([0, 100]);
+			return y(d.Minimum	); 
+		}
+		else
+			//y.domain([0, d3.max(data, function(d) { return d.Maximum; })]);
+			y.domain([30, 100]);
+			return y(d.Maximum	); 
+	
+	});
+		console.log(display_parameter);
+		//y.domain([0, 100]);
+		document.getElementById("chart").innerHTML="";
+		draw_valueline();
+}
+// Set the dimensions of the canvas / graph
+var margin = {top: 30, right: 20, bottom: 30, left: 50},
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// Parse the date / time
+var parseDate = d3.time.format("%d-%b-%y").parse;
+//var parseDate2 = d3.time.format("%m").parse;
+var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Set the ranges
+//var x = d3.time.scale().range([0, width ]);
+var y = d3.scale.linear().range([height, 100]);
+var x = d3.scale.linear().range([0, width]);
+
+// Define the axes
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(12);
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(10);
+
+var temp="Maximum";
+// Scale the range of the data
+    x.domain([1,12]);
+    y.domain([30, 100]);
+draw_valueline();
+function draw_valueline()
+{
+				
+		// Adds the svg canvas
+		var svg = d3.select(chart)
+			.append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", 
+					  "translate(" + margin.left + "," + margin.top + ")");
+
+					  var dataArray = [];
+		// Get the data
+		d3.csv("Data.csv", function(error, data) {
+			data.forEach(function(d) {
+				dataArray = d.Month;
+				dataArray = d.Average;
+			});
+			
+			// Add the valueline path.
+			svg.append("path")
+				.attr("class", "line")
+				.attr("stroke-width","2")
+				.attr("stroke","steelblue")
+				//.style("stroke-dasharray", ("4, 2"))
+				.attr("d", valueline(data))
+				.on("mouseover", function(d1){
+						svg.selectAll(".line")
+							//.transition()
+							//.duration(300)
+							.attr("stroke-opacity",function(d2){
+							if(d1==d2)
+							{	
+								return 1;
+							}
+							else
+								return 0;
+							})
+							;
+							console.log(d1);
+							
+					}
+					);
+				// Add the X Axis
+			svg.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + height + ")")
+				.call(xAxis);
+
+			// Add the Y Axis
+			svg.append("g")
+				.attr("class", "y axis")
+				.call(yAxis);
+			});
+}
+</script>
+</body>

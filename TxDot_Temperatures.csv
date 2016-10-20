@@ -1,4 +1,4 @@
-District,Month,Average Maximum (F),Average Minimum (F),Average Temperature (F)
+District,Month,Maximum,Minimum,Average
 AMA,1,49,23,36
 AMA,2,54,27,41
 AMA,3,62,34,48
