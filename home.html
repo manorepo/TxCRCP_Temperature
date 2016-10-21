@@ -27,25 +27,25 @@
             border-radius: 2px;
         }
 
-            /* Creates a small triangle extender for the tooltip */
-            .d3-tip:after {
-                box-sizing: border-box;
-                display: inline;
-                font-size: 10px;
-                width: 100%;
-                line-height: 1;
-                color: rgba(0, 0, 0, 0.8);
-                content: "\25BC";
-                position: absolute;
-                text-align: center;
-            }
+        /* Creates a small triangle extender for the tooltip */
+        .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.8);
+            content: "\25BC";
+            position: absolute;
+            text-align: center;
+        }
 
-            /* Style northward tooltips differently */
-            .d3-tip.n:after {
-                margin: -1px 0 0 0;
-                top: 100%;
-                left: 0;
-            }
+        /* Style northward tooltips differently */
+        .d3-tip.n:after {
+            margin: -1px 0 0 0;
+            top: 100%;
+            left: 0;
+        }
 
         .line {
             fill: none;
@@ -76,15 +76,19 @@
         .x.axis1 path {
             display: none;
         }
-        .avg-temp-line{
+
+        .avg-temp-line {
             stroke-width: 1.5px;
         }
-        .avg-min-temp-line{
+
+        .avg-min-temp-line {
             stroke-width: 1.5px;
         }
-        .avg-max-temp-line{
+
+        .avg-max-temp-line {
             stroke-width: 1.5px;
         }
+
         .line {
             fill: none;
             stroke-width: 1.5px;
@@ -110,7 +114,7 @@
             stroke-width: 1px;
             left: 10px;
             shape-rendering: crispEdges;
-            opacity: 1e-6;
+            opacity: 1 e-6;
         }
 
         .hover-text {
@@ -138,9 +142,9 @@
             fill: #aaa;
         }
 
-            #districts .active {
-                fill: orange;
-            }
+        #districts .active {
+            fill: orange;
+        }
 
         #state-borders {
             fill: none;
@@ -155,348 +159,409 @@
 
 <body>
 
-    <div class="row">
-        <!--Map Section-->
-        <div class="col-md-5 mapframe">
-        </div>
-        <!--TimeSeries Section-->
-        <div class="col-md-7  plotframe" style="padding-right: 20px">
-            <select onchange=change(this.value)>
-                <option value="Minimum">Minimum</option>
-                <option value="Average" selected=true>Average</option>
-                <option value="Maximum">Maximum</option>
-            </select>
-        </div>
+<div class="row">
+    <!--Map Section-->
+    <div class="col-md-5 mapframe">
     </div>
+    <!--TimeSeries Section-->
+    <div class="col-md-7  plotframe" style="padding-right: 20px">
+        <select onchange=change(this.value)>
+            <option value="Minimum">Minimum</option>
+            <option value="Average" selected=true>Average</option>
+            <option value="Maximum">Maximum</option>
+        </select>
+    </div>
+</div>
 
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <script src="js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<script src="js/bootstrap.min.js"></script>
 
-    <script src="//d3js.org/d3.v4.min.js"></script>
-    <script src="js/d3-tooltip.js"></script>
-    <script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
-    <script src="https://d3js.org/topojson.v1.min.js"></script>
-    <script type="text/javascript">//
-        var parse = d3.timeParse("%m %Y");
-    var display_parameter="Average"
-        var districtsData = [];
-        var tempData = [];
-        var avgTempDistricts;
-        var avgMinTempDistricts;
-        var avgMaxTempDistricts;
-        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      //  var color = d3.scaleOrdinal().range(["#48A36D", "#56AE7C", "#64B98C", "#72C39B", "#80CEAA", "#80CCB3", "#7FC9BD", "#7FC7C6", "#7EC4CF", "#7FBBCF", "#7FB1CF", "#80A8CE", "#809ECE", "#8897CE", "#8F90CD", "#9788CD", "#9E81CC", "#AA81C5", "#B681BE", "#C280B7", "#CE80B0", "#D3779F", "#D76D8F", "#DC647E", "#E05A6D", "#E16167", "#E26962", "#E2705C", "#E37756", "#E38457", "#E39158", "#E29D58", "#E2AA59", "#E0B15B", "#DFB95C", "#DDC05E", "#DBC75F", "#E3CF6D", "#EAD67C", "#F2DE8A"]);
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
-        // Define the line
-        var valueline = d3.line()
-            .x(function(d) { return x(d.Month); })
-            //.y(function(d) { return y(d.Maximum); });
-            .y(function(d) { 
-              if(display_parameter=="Average") {
-                  return y(d.Average);
-              }
-                if(display_parameter=="Minimum") {
-                    return y(d.Minimum);
-                }
-                if(display_parameter=="Maximum") {
-                    return y(d.Maximum);
-                }
-                })
-                .curve(d3.curveCatmullRom.alpha(0.25))
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script src="js/d3-tooltip.js"></script>
+<script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+<script type="text/javascript">//
+var parse = d3.timeParse("%m %Y");
+var display_parameter = "Average"
+var districtsData = [];
+var tempData = [];
+var avgTempDistricts;
+var avgMinTempDistricts;
+var avgMaxTempDistricts;
+var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+//  var color = d3.scaleOrdinal().range(["#48A36D", "#56AE7C", "#64B98C", "#72C39B", "#80CEAA", "#80CCB3", "#7FC9BD", "#7FC7C6", "#7EC4CF", "#7FBBCF", "#7FB1CF", "#80A8CE", "#809ECE", "#8897CE", "#8F90CD", "#9788CD", "#9E81CC", "#AA81C5", "#B681BE", "#C280B7", "#CE80B0", "#D3779F", "#D76D8F", "#DC647E", "#E05A6D", "#E16167", "#E26962", "#E2705C", "#E37756", "#E38457", "#E39158", "#E29D58", "#E2AA59", "#E0B15B", "#DFB95C", "#DDC05E", "#DBC75F", "#E3CF6D", "#EAD67C", "#F2DE8A"]);
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+// Define the line
+var valueline = d3.line()
+        .x(function (d) {
+            return x(d.Month);
+        })
+        .y(function (d) {
+            if (display_parameter == "Average") {
+                return y(d.Average);
+            }
+            if (display_parameter == "Minimum") {
+                return y(d.Minimum);
+            }
+            if (display_parameter == "Maximum") {
+                return y(d.Maximum);
+            }
+        }).curve(d3.curveCatmullRom.alpha(0.25))
 
 
-                var margin = { top: 20, right: 20, bottom: 110, left: 50 },
-        margin2 = { top: 430, right: 20, bottom: 30, left: 40 },
+var margin = {top: 20, right: 20, bottom: 110, left: 50},
+        margin2 = {top: 430, right: 20, bottom: 30, left: 40},
         width = 700 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom,
         height2 = 500 - margin2.top - margin2.bottom - 10;
 
 
-                // Set the ranges
-                var x = d3.scaleTime().range([0, width]);
-                var y = d3.scaleLinear().range([height, 0]),
-                x2 = d3.scaleTime().range([0, width]),
-                y2 = d3.scaleLinear().range([height2, 0]);
+// Set the ranges
+var x = d3.scaleTime().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]),
+        x2 = d3.scaleTime().range([0, width]),
+        y2 = d3.scaleLinear().range([height2, 0]);
 
-                var xAxis = d3.axisBottom(x)
-                        .ticks(12)
-                        .tickFormat(function(d) {
-                            return months[d-1];
+var xAxis = d3.axisBottom(x)
+        .ticks(12)
+        .tickFormat(function (d) {
+            return months[d - 1];
+        })
+var yAxis = d3.axisLeft(y);
+
+// Append the time series svg canvas
+var svg = d3.select(".plotframe").append("svg")
+        .attr("width", "100%")
+        .attr("height", height + margin.top + margin.bottom) //height + margin.top + margin.bottom
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("TxDot_Temperatures.csv", function (data) {
+    data.forEach(function (d) {
+        //  console.log(d);
+        tempData.push({
+            "dist_code": d.District,
+            "dist_name": "test",
+            "Month": d.Month,
+            "Maximum": +d["Maximum"],
+            "Minimum": +d["Minimum"],
+            "Average": +d["Average"]
+
+        });
+    });
+    districtsData = d3.nest()
+            .key(function (d) {
+                return d.dist_code;
+            }).sortKeys(d3.ascending)
+            .entries(tempData);
+    var lineTip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-5, 0])
+            .html(function (d) {
+                //  console.log(d);
+                return "<strong>" + d.Average + "</strong>";
+            });
+    svg.call(lineTip);
+    x.domain([1, 12]);
+    y.domain([10, 100]);
+    color.domain(districtsData.map(function (d) {
+        return d.key
+    }));
+    //
+    // focus tracking
+
+    var focus = svg.append('g').style('display', 'none');
+
+    focus.append('line')
+            .attr('id', 'focusLineX')
+            .attr('class', 'focusLine');
+    focus.append('line')
+            .attr('id', 'focusLineY')
+            .attr('class', 'focusLine');
+    focus.append('circle')
+            .attr('id', 'focusCircle')
+            .attr('r', 5)
+            .attr('class', 'circle focusCircle');
+
+    var bisectDate = d3.bisector(function(d) { return d[0]; }).left;
+
+    //Create Paths for average temperature
+    avgTempDistricts = svg.selectAll(".avg-temp-line")
+            .data(districtsData).enter()
+            .append("path")
+            .attr("class", "avg-temp-line")
+            //.style("pointer-events", "none")
+            .style("fill", "none")// Stop line interferring with cursor
+            .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
+            .style("stroke", function (d) {
+                return color(d.key);
+            })
+            .attr("stroke-width", "2")
+            .style("stroke-dasharray", ("4, 2"))
+           /* .on('mouseover', function (d) {
+
+                console.log("sdf" + d.values[d.values[0].Month].Average);
+                svg.selectAll("circle")
+                        .data(d.values).enter()
+                        .append("circle")
+                        .attr("opacity", 0)
+                        .attr("cx", function (d) {
+                            //debugger;
+                            return x(d.Month);
                         })
-                var yAxis = d3.axisLeft(y);
+                        .attr("cy", function (d) {
 
-                // Append the time series svg canvas
-                var svg = d3.select(".plotframe").append("svg")
-                        .attr("width", "100%")
-                        .attr("height", height + margin.top + margin.bottom) //height + margin.top + margin.bottom
-                        .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                d3.csv("TxDot_Temperatures.csv", function (data) {
-                    data.forEach(function (d) {
-                        //  console.log(d);
-                        tempData.push({
-                            "dist_code": d.District,
-                            "dist_name": "test",
-                            "Month": d.Month,
-                            "Maximum": +d["Maximum"],
-                            "Minimum": +d["Minimum"],
-                            "Average": +d["Average"]
-
+                            return y(d.Average);
+                        })
+                        .attr("r", 10)
+                        .on('mouseover', function (d) {
+                            d3.select(this).attr("opacity","1");
+                            lineTip.show(d)
+                        })
+                        .on('mouseout', function (d) {
+                            lineTip.hide(d)
                         });
-                    });
-                    districtsData = d3.nest()
-                 .key(function (d) {
-                     return d.dist_code;
-                 }).sortKeys(d3.ascending)
-                 .entries(tempData);
 
-                 //   console.log(districtsData);
 
-                    //
-                    /*avgTempDistricts = svg.selectAll(".Avg-Temp")
-                       .data(districtsData) // Select nested data and append to new svg group elements
-                       .enter().append("g")
-                       .attr("class", "Avg-Temp-District")*/
-                  
-                   /* avgMinTempDistricts = svg.selectAll(".Avg-Min-Temp")
-                       .data(districtsData) // Select nested data and append to new svg group elements
-                       .enter().append("g")
-                       .attr("class", "Avg-Min-Temp");
-                    avgMaxTempDistricts = svg.selectAll(".Avg-Max-Temp")
-                       .data(districtsData) // Select nested data and append to new svg group elements
-                       .enter().append("g")
-                       .attr("class", "Avg-Max-Temp");*/
-                    x.domain([1,12]);
-                    y.domain([10, 100]);
-                    color.domain(districtsData.map(function (d) {
-                        return d.key
-                    }));
-                    avgTempDistricts=svg.selectAll(".avg-temp-line")
-                            .data(districtsData).enter()
-                    .append("path")
-                    .attr("class", "avg-temp-line")
-                    .style("pointer-events", "none")
-                    .style("fill", "none")// Stop line interferring with cursor
-                    .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
-                    .style("stroke", function (d) {
-                        return color(d.key);
-                    })
+            })*/
+            //.on('mouseover',lineTip.show)
 
-                    avgMinTempDistricts=svg.selectAll(".avg-min-temp-line")
-                            .data(districtsData).enter()
-                            .append("path")
-                            .attr("class", "avg-min-temp-line")
-                            .style("pointer-events", "none")
-                            .style("fill", "none")// Stop line interferring with cursor
-                            .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
-                            .style("stroke", function (d) {
-                                return color(d.key);
-                            })
-                    avgMaxTempDistricts=svg.selectAll(".avg-max-temp-line")
-                            .data(districtsData).enter()
-                            .append("path")
-                            .attr("class", "avg-max-temp-line")
-                            .style("pointer-events", "none")
-                            .style("fill", "none")// Stop line interferring with cursor
-                            .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
-                            .style("stroke", function (d) {
-                                return color(d.key);
-                            })
-                   
 
-/*
-                    avgTempDistricts
-                                    .attr("d", function (d) {
-                                        return valueline(d.values);
-                                    });*/
-                    // Add the X Axis
-                    svg.append("g")
-                            .attr("class", "x axis")
-                            .attr("transform", "translate(0," + height + ")")
-                            .call(xAxis);
-                  
-                    // Add the Y Axis
-                    svg.append("g")
-                            .attr("width", width)
-                            .attr("height", height)
-                            .attr("x", 0)
-                            .attr("y", 0)
-                            .attr("class", "y axis")
-                            .call(yAxis);
+    avgMinTempDistricts = svg.selectAll(".avg-min-temp-line")
+            .data(districtsData).enter()
+            .append("path")
+            .attr("class", "avg-min-temp-line")
+            .style("pointer-events", "none")
+            .style("fill", "none")// Stop line interferring with cursor
+            .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
+            .style("stroke", function (d) {
+                return color(d.key);
+            })
+            .on("mouseover", function (d) {
+                console.log("Min");
+            })
+    avgMaxTempDistricts = svg.selectAll(".avg-max-temp-line")
+            .data(districtsData).enter()
+            .append("path")
+            .attr("class", "avg-max-temp-line")
+            .style("pointer-events", "none")
+            .style("fill", "none")// Stop line interferring with cursor
+            .attr("clip-path", "url(#clip)") //use clip path to make irrelevant part invisible
+            .style("stroke", function (d) {
+                return color(d.key);
+            })
+            .on("mouseover", function (d) {
+                console.log("Max");
+            })
+
+    // Add the X Axis
+    svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+    // Add the Y Axis
+    svg.append("g")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("class", "y axis")
+            .call(yAxis);
+
+});
+
+svg.append('rect')
+        .attr('class', 'overlay')
+        .attr('width', width)
+        .attr('height', height)
+        .attr("fill","none")
+        .style("pointer-events", "all")
+        .on('mouseover', function() { focus.style('display', null); })
+        .on('mouseout', function() { focus.style('display', 'none'); })
+        .on('mousemove', function() {
+            var mouse = d3.mouse(this);
+            var mouseDate = x.invert(mouse[0]);
+            var i = bisectDate(districtsData, mouseDate); // returns the index to the current data item
+
+            var d0 = districtsData[i - 1]
+            var d1 = districtsData[i];
+            // work out which date value is closest to the mouse
+            var d = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0;
+
+            var xs = x(d[0]);
+            var ys = y(d[1]);
+
+            focus.select('#focusCircle')
+                    .attr('cx', x)
+                    .attr('cy', y);
+            focus.select('#focusLineX')
+                    .attr('x1', xs).attr('y', ys(y.domain()[0]))
+                    .attr('x2', xs).attr('y', ys(y.domain()[1]));
+            focus.select('#focusLineY')
+                    .attr('x', xs(x.domain()[0])).attr('y1', ys)
+                    .attr('x', ys(x.domain()[1])).attr('y2', ys);
+        });
+//Map SVG Logic
+{
+    var mapWidth = 560, mapHeight = 600, centered;
+
+    var projection = d3.geoMercator()
+            .center([-99.43, 31.47])
+            .scale(2000)
+            .translate([mapWidth / 2, mapHeight / 2]);
+
+    var mappath = d3.geoPath()
+            .projection(projection);
+
+    var mapsvg = d3.select(".mapframe").append("svg")
+            .attr("width", mapWidth)
+            .attr("height", mapHeight);
+
+    /* Initialize tooltip */
+    var mapTip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function (d) {
+                //  console.log(d);
+                return "<strong>" + d.properties.DIST_NM + "</strong>";
+            });
+    mapsvg.call(mapTip);
+    //mapsvg.append("rect")
+    //        .attr("class", "background")
+    //        .attr("Width", mapWidth)
+    //        .attr("Height", mapHeight)
+    //  .on("click", clicked);
+
+    var mapg = mapsvg.append("g");
+
+    d3.json("TxDOT_Districts.geojson", function (error, us) {
+
+        map_states = mapg.append("g")
+                .attr("id", "districts")
+                .selectAll("path")
+                .data(us.features)
+                .enter().append("path")
+                .attr("d", mappath)
+                .attr("title", function (d) {
+                    return d.properties.DIST_NM
+                })
+                .on('mouseover', mapTip.show)
+                .on('mouseout', mapTip.hide)
+                .on('click', clicked)
+
+
+        mapg.append("path")
+                .datum(topojson.mesh(us, us.features, function (a, b) {
+                    return a !== b;
+                }))
+                .attr("id", "state-borders")
+                .attr("d", mappath);
+
+    });
+}
+function clicked(d) {
+
+    d.active = !d.active;
+
+    avgTempDistricts
+            .attr("d", function (d1) {
+                if (d.properties.DIST_ABRVN_NM == d1.key)
+                    d1.visible = !d1.visible;
+
+
+                return d1.visible ? valueline(d1.values) : null;
+
+            });
+    mapg.selectAll("path")
+            .transition()
+            .duration(100)
+            .ease(d3.easeLinear)
+            .attr("fill", function (d2) {
+
+                if (d2.active == true) {
+                    return color(d2.properties.DIST_ABRVN_NM);
+                }
+                else {
+                    return "grey";
+                }
+            });
+
+
+}
+function change(s) {
+    display_parameter = "" + s;
+
+    plotData();
+}
+function plotData() {
+    if (display_parameter == "Average") {
+        avgMinTempDistricts
+                .attr("d", function (d1) {
+                    return null;
                 });
-                //   console.log(districtsData);
+        avgMaxTempDistricts
+                .attr("d", function (d1) {
+                    return null;
+                });
+        avgTempDistricts
+                .attr("d", function (d1) {
+                    return d1.visible ? valueline(d1.values) : null;
 
-              
-
-                //Map SVG Logic
-                {
-                    var mapWidth = 560, mapHeight = 600, centered;
-
-                    var projection = d3.geoMercator()
-                        .center([-99.43, 31.47])
-                            .scale(2000)
-                            .translate([mapWidth / 2, mapHeight / 2]);
-
-                    var mappath = d3.geoPath()
-                            .projection(projection);
-
-                    var mapsvg = d3.select(".mapframe").append("svg")
-                            .attr("width", mapWidth)
-                            .attr("height", mapHeight);
-
-                    /* Initialize tooltip */
-                    var mapTip = d3.tip()
-                        .attr('class', 'd3-tip')
-                        .offset([-10, 0])
-                        .html(function (d) {
-                            //  console.log(d);
-                            return "<strong>" + d.properties.DIST_NM + "</strong>";
-                        });
-                    mapsvg.call(mapTip);
-                    //mapsvg.append("rect")
-                    //        .attr("class", "background")
-                    //        .attr("Width", mapWidth)
-                    //        .attr("Height", mapHeight)
-                    //  .on("click", clicked);
-
-                    var mapg = mapsvg.append("g");
-
-                    d3.json("TxDOT_Districts.geojson", function (error, us) {
-
-                        map_states = mapg.append("g")
-                                .attr("id", "districts")
-                                .selectAll("path")
-                                .data(us.features)
-                                .enter().append("path")
-                                .attr("d", mappath)
-                                .attr("title", function (d) {
-                                    return d.properties.DIST_NM
-                                })
-                        .on('mouseover', mapTip.show)
-                        .on('mouseout', mapTip.hide)
-                        .on('click', clicked)
-
-
-
-                        mapg.append("path")
-                                .datum(topojson.mesh(us, us.features, function (a, b) { return a !== b; }))
-                                .attr("id", "state-borders")
-                                .attr("d", mappath);
-
-                    });
-                }
-                function clicked(d) {
-
-                    d.active = !d.active;
-                    
-                    avgTempDistricts
-                                    .attr("d", function(d1) {
-                                        if (d.properties.DIST_ABRVN_NM == d1.key)
-                                            d1.visible = !  d1.visible;
-
-
-                                        return  d1.visible ? valueline(d1.values) : null;
-
-                                    });
-                    mapg.selectAll("path")
-                            .transition()
-                            .duration(100)
-                            .ease(d3.easeLinear)
-                            .attr("fill", function (d2) {
-
-                                if (d2.active == true) {
-                                    return color(d2.properties.DIST_ABRVN_NM);
-                                }
-                                else {
-                                    return "grey";
-                                }
-                            });
-                   
-
-                }
-    function change(s)
-    {
-        display_parameter=""+s;
-
-       plotData();
+                });
     }
-    function plotData(){
-        if(display_parameter=="Average") {
-            avgMinTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-            avgMaxTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-            avgTempDistricts
-                    .attr("d", function (d1) {
-
-
-
-                        return d1.visible ? valueline(d1.values) : null;
-
-                    });
-        }
-        if(display_parameter=="Minimum") {
-            avgTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-            avgMaxTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-
-            avgMinTempDistricts
-                    .attr("d", function (d1) {
-
-
-                        return d1.visible ? valueline(d1.values) : null;
-
-                    });
-        }
-        if(display_parameter=="Maximum") {
-            avgMinTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-            avgTempDistricts
-                    .attr("d", function (d1) {
-                        return  null;
-                    });
-
-            avgMaxTempDistricts
-                    .attr("d", function (d1) {
-
-
-
-                        return d1.visible ? valueline(d1.values) : null;
-
-                    });
-        }
-        mapg.selectAll("path")
-                .transition()
-                .duration(100)
-                .ease(d3.easeLinear)
-                .attr("fill", function (d2) {
-
-                    if (d2.active == true) {
-                        return color(d2.properties.DIST_ABRVN_NM);
-                    }
-                    else {
-                        return "grey";
-                    }
+    if (display_parameter == "Minimum") {
+        avgTempDistricts
+                .attr("d", function (d1) {
+                    return null;
+                });
+        avgMaxTempDistricts
+                .attr("d", function (d1) {
+                    return null;
                 });
 
+        avgMinTempDistricts
+                .attr("d", function (d1) {
+                    return d1.visible ? valueline(d1.values) : null;
+
+                });
     }
-    </script>
+    if (display_parameter == "Maximum") {
+        avgMinTempDistricts
+                .attr("d", function (d1) {
+                    return null;
+                });
+        avgTempDistricts
+                .attr("d", function (d1) {
+                    return null;
+                });
+
+        avgMaxTempDistricts
+                .attr("d", function (d1) {
+                    return d1.visible ? valueline(d1.values) : null;
+
+                });
+    }
+    mapg.selectAll("path")
+            .transition()
+            .duration(100)
+            .ease(d3.easeLinear)
+            .attr("fill", function (d2) {
+
+                if (d2.active == true) {
+                    return color(d2.properties.DIST_ABRVN_NM);
+                }
+                else {
+                    return "grey";
+                }
+            })
+
+
+}
+</script>
 </body>
-
 
 
 </html>
