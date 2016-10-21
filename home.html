@@ -190,6 +190,7 @@ var tempData = [];
 var avgTempDistricts;
 var avgMinTempDistricts;
 var avgMaxTempDistricts;
+var circlesg;
 var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 //  var color = d3.scaleOrdinal().range(["#48A36D", "#56AE7C", "#64B98C", "#72C39B", "#80CEAA", "#80CCB3", "#7FC9BD", "#7FC7C6", "#7EC4CF", "#7FBBCF", "#7FB1CF", "#80A8CE", "#809ECE", "#8897CE", "#8F90CD", "#9788CD", "#9E81CC", "#AA81C5", "#B681BE", "#C280B7", "#CE80B0", "#D3779F", "#D76D8F", "#DC647E", "#E05A6D", "#E16167", "#E26962", "#E2705C", "#E37756", "#E38457", "#E39158", "#E29D58", "#E2AA59", "#E0B15B", "#DFB95C", "#DDC05E", "#DBC75F", "#E3CF6D", "#EAD67C", "#F2DE8A"]);
 var color = d3.scaleOrdinal(d3.schemeCategory20);
@@ -260,8 +261,14 @@ d3.csv("TxDot_Temperatures.csv", function (data) {
             .attr('class', 'd3-tip')
             .offset([-5, 0])
             .html(function (d) {
-                //  console.log(d);
-                return "<strong>" + d.Average + "</strong>";
+                if (display_parameter == "Average")
+                    return "<strong>" + d.dist_code + " " + d.Average + "F" + "</strong>";
+                else if (display_parameter == "Minimum")
+                    return "<strong>" + d.dist_code + " " + d.Minimum + "F" + "</strong>";
+                else if (display_parameter == "Maximum")
+                    return "<strong>" + d.dist_code + " " + d.Maximum + "F" + "</strong>";
+                else
+                return "<strong></strong>";
             });
     svg.call(lineTip);
     x.domain([1, 12]);
@@ -355,7 +362,23 @@ d3.csv("TxDot_Temperatures.csv", function (data) {
             .on("mouseover", function (d) {
                 console.log("Max");
             })
-
+    // Draw circles
+    var s = svg.selectAll(".circlesg1")
+    .data(districtsData)
+    .enter().append("g");
+    circlesg = s.append("g")
+   .attr("class", "circlesg")
+    circlesg.selectAll("circle")
+      .data(function (d) {
+          return d.values;
+      }).enter()
+      .append("circle")
+      .on("mouseover", function (d) {
+          lineTip.show(d)
+      })
+      .on("mouseout", function (d) {
+          lineTip.hide(d)
+      })
     // Add the X Axis
     svg.append("g")
             .attr("class", "x axis")
@@ -373,37 +396,37 @@ d3.csv("TxDot_Temperatures.csv", function (data) {
 
 });
 
-svg.append('rect')
-        .attr('class', 'overlay')
-        .attr('width', width)
-        .attr('height', height)
-        .attr("fill","none")
-        .style("pointer-events", "all")
-        .on('mouseover', function() { focus.style('display', null); })
-        .on('mouseout', function() { focus.style('display', 'none'); })
-        .on('mousemove', function() {
-            var mouse = d3.mouse(this);
-            var mouseDate = x.invert(mouse[0]);
-            var i = bisectDate(districtsData, mouseDate); // returns the index to the current data item
+//svg.append('rect')
+//        .attr('class', 'overlay')
+//        .attr('width', width)
+//        .attr('height', height)
+//        .attr("fill","none")
+//        .style("pointer-events", "all")
+//        .on('mouseover', function() { focus.style('display', null); })
+//        .on('mouseout', function() { focus.style('display', 'none'); })
+//        .on('mousemove', function() {
+//            var mouse = d3.mouse(this);
+//            var mouseDate = x.invert(mouse[0]);
+//            var i = bisectDate(districtsData, mouseDate); // returns the index to the current data item
 
-            var d0 = districtsData[i - 1]
-            var d1 = districtsData[i];
-            // work out which date value is closest to the mouse
-            var d = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0;
+//            var d0 = districtsData[i - 1]
+//            var d1 = districtsData[i];
+//            // work out which date value is closest to the mouse
+//            var d = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0;
 
-            var xs = x(d[0]);
-            var ys = y(d[1]);
+//            var xs = x(d[0]);
+//            var ys = y(d[1]);
 
-            focus.select('#focusCircle')
-                    .attr('cx', x)
-                    .attr('cy', y);
-            focus.select('#focusLineX')
-                    .attr('x1', xs).attr('y', ys(y.domain()[0]))
-                    .attr('x2', xs).attr('y', ys(y.domain()[1]));
-            focus.select('#focusLineY')
-                    .attr('x', xs(x.domain()[0])).attr('y1', ys)
-                    .attr('x', ys(x.domain()[1])).attr('y2', ys);
-        });
+//            focus.select('#focusCircle')
+//                    .attr('cx', x)
+//                    .attr('cy', y);
+//            focus.select('#focusLineX')
+//                    .attr('x1', xs).attr('y', ys(y.domain()[0]))
+//                    .attr('x2', xs).attr('y', ys(y.domain()[1]));
+//            focus.select('#focusLineY')
+//                    .attr('x', xs(x.domain()[0])).attr('y1', ys)
+//                    .attr('x', ys(x.domain()[1])).attr('y2', ys);
+//        });
 //Map SVG Logic
 {
     var mapWidth = 560, mapHeight = 600, centered;
@@ -466,15 +489,70 @@ function clicked(d) {
 
     d.active = !d.active;
 
-    avgTempDistricts
-            .attr("d", function (d1) {
-                if (d.properties.DIST_ABRVN_NM == d1.key)
-                    d1.visible = !d1.visible;
+    if (display_parameter == "Average") {
+        avgTempDistricts
+                .attr("d", function (d1) {
+                    if (d.properties.DIST_ABRVN_NM == d1.key)
+                        d1.visible = !d1.visible;
 
 
-                return d1.visible ? valueline(d1.values) : null;
+                    return d1.visible ? valueline(d1.values) : null;
 
-            });
+                });
+    }
+    else if (display_parameter == "Minimum") {
+        avgMinTempDistricts
+                 .attr("d", function (d1) {
+                     if (d.properties.DIST_ABRVN_NM == d1.key)
+                         d1.visible = !d1.visible;
+
+
+                     return d1.visible ? valueline(d1.values) : null;
+
+                 });
+    }
+    else if (display_parameter == "Maximum") {
+        avgMaxTempDistricts
+                .attr("d", function (d1) {
+                    if (d.properties.DIST_ABRVN_NM == d1.key)
+                        d1.visible = !d1.visible;
+
+
+                    return d1.visible ? valueline(d1.values) : null;
+
+                });
+    }
+    circlesg.selectAll("circle")
+            
+       .attr("fill-opacity", "1.0")
+        .attr("fill", "grey")
+       .attr("cx", function (d1) {
+           if (d.properties.DIST_ABRVN_NM == d1.dist_code) {
+               d1.visible = !d1.visible;
+           }
+               return d1.visible ? x(d1.Month) : null;
+
+       })
+       .attr("cy", function (d1) {
+           if (display_parameter == "Average")
+               return d1.visible ? y(d1.Average) : null;
+           else if (display_parameter == "Minimum")
+               return d1.visible ? y(d1.Minimum) : null;
+           else if (display_parameter == "Maximum")
+               return d1.visible ? y(d1.Maximum) : null;
+           else
+               return null;
+
+            
+       })
+       .attr("r", function (d) {
+           return d.visible ? "4":null
+       })
+       
+       .attr("title", function (d) {
+           return d.dist_name
+       });
+
     mapg.selectAll("path")
             .transition()
             .duration(100)
@@ -557,6 +635,35 @@ function plotData() {
                     return "grey";
                 }
             })
+
+    circlesg.selectAll("circle")
+
+       .attr("fill-opacity", "1.0")
+        .attr("fill", "grey")
+       .attr("cx", function (d1) {
+         
+           return d1.visible ? x(d1.Month) : null;
+
+       })
+       .attr("cy", function (d1) {
+           if (display_parameter == "Average")
+               return d1.visible ? y(d1.Average) : null;
+           else if (display_parameter == "Minimum")
+               return d1.visible ? y(d1.Minimum) : null;
+           else if (display_parameter == "Maximum")
+               return d1.visible ? y(d1.Maximum) : null;
+           else
+               return null;
+
+
+       })
+       .attr("r", function (d) {
+           return d.visible ? "4" : null
+       })
+
+       .attr("title", function (d) {
+           return d.dist_name
+       });
 
 
 }
