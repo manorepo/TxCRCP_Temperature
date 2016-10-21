@@ -272,7 +272,7 @@ d3.csv("TxDot_Temperatures.csv", function (data) {
             });
     svg.call(lineTip);
     x.domain([1, 12]);
-    y.domain([10, 100]);
+    y.domain([findMinY(), findMaxY()]);
     color.domain(districtsData.map(function (d) {
         return d.key
     }));
@@ -393,6 +393,25 @@ d3.csv("TxDot_Temperatures.csv", function (data) {
             .attr("y", 0)
             .attr("class", "y axis")
             .call(yAxis);
+
+    // Add the text label for the x axis
+    svg.append("text")
+            .attr("transform", "translate(" + (width / 2) + " ," + (height + margin2.bottom) + ")")
+            .style("text-anchor", "middle")
+            .text("Month")
+            .attr("class", "axis-label")
+            .attr("fill", "#900000");
+
+    // Add the text label for the Y axis
+    svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0-40 )
+            .attr("x", 0-30 )
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Temperature (F)")
+            .attr("class", "axis-label")
+            .attr("fill", "#900000");
 
 });
 
@@ -569,9 +588,57 @@ function clicked(d) {
 
 
 }
-function change(s) {
-    display_parameter = "" + s;
 
+function findMaxY() { // Define function "findMaxY"
+    var maxYValues = districtsData.map(function (d) {
+
+            var val = [];
+            for (var i = 0; i < d.values.length; i++) {
+                    val.push(d.values[i]);
+            }
+
+            return d3.max(val, function (value) { // Return max rating value
+                if (display_parameter == "Average")
+                    return value.Average;
+                else if (display_parameter == "Minimum")
+                    return value.Minimum;
+                else
+                    return value.Maximum;
+            })
+
+    });
+   return d3.max(maxYValues);
+}
+function findMinY() { // Define function "findMaxY"
+    var minYValues = districtsData.map(function (d) {
+
+        var val = [];
+        for (var i = 0; i < d.values.length; i++) {
+                val.push(d.values[i]);
+        }
+
+        return d3.min(val, function (value) { // Return max rating value
+            if (display_parameter == "Average")
+                return value.Average;
+            else if (display_parameter == "Minimum")
+                return value.Minimum;
+            else
+                return value.Maximum;
+
+
+        })
+
+    });
+    return d3.min(minYValues);
+}
+function change(s) {
+
+    display_parameter = "" + s;
+    y.domain([findMinY(), findMaxY()]);
+
+    svg.select(".y.axis")
+            .transition()
+            .call(yAxis);
     plotData();
 }
 function plotData() {
